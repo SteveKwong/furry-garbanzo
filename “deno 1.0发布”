@@ -1,0 +1,51 @@
+虽然我并不是前端娱乐圈的人，但之前也学过一段时间的nodejs,而且平时一直用npm来管理安装包，所有当deno真的出来后，我还是产生了一种自己要被淘汰的感觉。
+
+deno的前世-node.js
+node的出现把前端带进了一个新的阶段，nodejs借助JavaScript天生的事件驱动机制加V8高性能引擎,可以快速实现web服务开发，模块化的js代码加上函数式编程可以让开发人员快速实现功能而不需考虑浏览器兼容问题，而最新的ex6标准更是成为一前端变革性规范一直流行至今。
+所以当Ryan Dahl在2018年宣布放弃node.js在业界引起了轩然大波，然而如果看了当时的演讲内容，你会发现nodejs的缺陷是如此致命且无法挽回。
+
+放棄原生支援 Promise
+Ryan Dahl之前在node.js上加入了Promise，不久后又将其移除，虽然之后又加入了回来，但是当时的许多核心API的async API操作已经定型，再重新适配pomise已是非常麻烦的事
+
+安全性缺乏保障
+前面提到 Node.js 是以 Chrome V8 引擎来执行 JS，而 V8 是一个非常安全的 sandbox，如你使用 Google Chrome 一样，你不能轻易的去访问系统资源，但同样使用 V8 的 Node.js 却能够不需要『授权』，即可访问网路、档案系统，甚至是记忆体资讯。
+这确实牵扯到所谓的安全性问题，但这也是在开发便利性上的取捨，只是在资安考量越趋重要的时代，会是 Node.js 被质疑的问题之一。其实，很多语言也有同样的问题，但若你是使用 Unix-Like的系统，系统层会档掉而已，所以你会有被询问是否授权的经验，但在目前 Windows 上确实是会畅通无阻。
+
+Build System
+这项是 Ryan Dahl 认为 Node 设计上最大的缺失，就是 Node 是使用 GYP 做为产生建构项目的系统。GYP 是Google Chromium 团队用来建构项目文件让 GCC、VSBuild 等编译平台来编译 C++ Library 的工具。
+在 Node 开发早期，Chrome V8 是以 GYP 建构系统，而 Node 也就沿用了 GYP，但不久后 Chrome 放弃 GYP 转而使用 GN，而 Node 已经无法挽回。因此 Node 成了目前在 V8 上唯一使用 GYP 的用户，而 GN 速度比 GYP 快了将近 20 倍、文件可读性高且支援许多依赖。
+另外 Ryan Dahl 也认为应该提供更为简便的接口(FFI)，让开发者想绑定其他系统 library 时可以更为简便，而非需要自己写 C++ 才能引用这些动态库，早期有许多人建议 Ryan Dahl 这麽做，但都被 Ryan Dahl 漠视了。
+
+Package.json
+在 Node.js 中，可透过 require() 方式来引入 package，加上 NPM 的生态，看似是一个很不错设计。但其实产生了几个问题
+Image text
+
+package.json 变成了必需品，这是其他语言开发者所没有过的。
+package.json 记录了太多不必要资讯，包含描述、许可证、仓库等。
+require 自动省略副档名方式，导致需要额外的判断这是 js? 还是这是 ts? 多了需多不必要的判断，增加编译时的负担。
+Npm 成了集权且标准的中央函式库，若 Npm 发生问题将可能引发全球灾难，像是 2016 年的 left-pad 问题。
+当你引入一个 package A，你需要在代码 require A，且 package.json 里要发布此 package A 的版本等等资讯，而 NPM Database 要有一份 A 的代码，而你的 node_modules 也有一份 A 的代码。如果你也是前端开发者，在 Web Browser 的使用情景里，JS 要从哪边 include 只需要引入 URL 或是本地库就好，而不需要上面这些多余的动作。
+deno
+Deno is a simple, modern and secure runtime for JavaScript and TypeScript that uses V8 and is built in Rust.
+
+新的deno改进了nodejs中的不完善和缺陷部分，Promise 语法 + TypeScript 支持 + ES 模块，让开发者没理由不说真香
+Image text
+deno使用了rust语言编写，为什么不用c++主要原因是 Rust 提供了很多现成的模块，对 Deno 项目来说，可以节约很多开发时间。
+Image text
+Deno 具有安全控制，默认情况下脚本不具有读写权限。如果脚本未授权，就读写文件系统或网络，会报错。
+
+必须使用参数，显式打开权限才可以。
+
+–allow-read：打开读权限，可以指定可读的目录，比如–allow-read=/temp。
+–allow-write：打开写权限。
+–allow-net=google.com：允许网络通信，可以指定可请求的域，比如–allow-net=google.com。
+–allow-env：允许读取环境变量。
+
+Image text
+Deno 只支持 ES 模块，跟浏览器的模块加载规则一致。没有 npm，没有 npm_modules 目录，没有require()命令（即不支持 CommonJS 模块），也不需要package.json文件。
+
+所有模块通过 URL 加载，比如import { bar } from “https://foo.com/bar.ts"（绝对 URL）或import { bar } from ‘./foo/bar.ts’（相对 URL）。因此，Deno 不需要一个中心化的模块储存系统，可以从任何地方加载模块。
+
+但是，Deno 下载模块以后，依然会有一个总的目录，在本地缓存模块，因此可以离线使用。
+
+现在的deno已经发布公布1.0版本，不过可用的库太少了，期待下后续发展把。
